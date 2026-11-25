@@ -1,0 +1,43 @@
+{
+    "name": "greymore/laravel-sqlitehub",
+    "description": "Laravel database driver for SQLiteHub (libSQL/sqld) over HTTPS, in pure PHP: no FFI or native extensions.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "sqlite", "libsql", "sqld", "hrana", "sqlitehub", "database"],
+    "homepage": "https://sqlitehub.in",
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "guzzlehttp/guzzle": "^7.8",
+        "illuminate/database": "^12.0|^13.0",
+        "illuminate/http": "^12.0|^13.0",
+        "illuminate/support": "^12.0|^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^10.0|^11.0",
+        "phpunit/phpunit": "^11.5|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "SQLiteHub\\Laravel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SQLiteHub\\Laravel\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "SQLiteHub\\Laravel\\SQLiteHubServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
