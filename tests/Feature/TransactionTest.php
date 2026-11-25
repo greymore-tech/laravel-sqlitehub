@@ -47,6 +47,17 @@ class TransactionTest extends TestCase
         $this->assertNull($this->pdo()->baton());
     }
 
+    public function test_transaction_mode_is_used_on_every_php_version(): void
+    {
+        config(['database.connections.sqlitehub.transaction_mode' => 'immediate']);
+        DB::purge('sqlitehub');
+
+        DB::transaction(fn () => DB::table('items')->insert(['name' => 'a']));
+
+        $this->assertSame('BEGIN IMMEDIATE TRANSACTION', $this->server->requests[0]->data()['requests'][1]['stmt']['sql']);
+        $this->assertSame(['a'], $this->names());
+    }
+
     public function test_exception_rolls_back(): void
     {
         try {

@@ -86,6 +86,19 @@ class SQLiteHubConnection extends SQLiteConnection
     }
 
     /**
+     * BEGIN with the configured transaction_mode (DEFERRED, IMMEDIATE or
+     * EXCLUSIVE) on every PHP version. Laravel only honours the setting on
+     * PHP 8.4+ and sends a plain (deferred) BEGIN before that; apps that run
+     * several writers rely on IMMEDIATE taking the write lock up front.
+     */
+    protected function executeBeginTransactionStatement()
+    {
+        $mode = strtoupper((string) ($this->getConfig('transaction_mode') ?? 'DEFERRED'));
+
+        $this->getPdo()->exec("BEGIN {$mode} TRANSACTION");
+    }
+
+    /**
      * Never let Laravel reconnect and re-run a statement after a network
      * error: that would repeat writes. HranaClient retries reads itself.
      */

@@ -120,7 +120,7 @@ class FakeHranaServer
             return match ($req['type']) {
                 'execute' => ['type' => 'ok', 'response' => ['type' => 'execute', 'result' => $this->execute($pdo, $req['stmt'])]],
                 'sequence' => tap(['type' => 'ok', 'response' => ['type' => 'sequence']], fn () => $pdo->exec($req['sql'])),
-                'get_autocommit' => ['type' => 'ok', 'response' => ['type' => 'get_autocommit', 'is_autocommit' => ! $pdo->inTransaction()]],
+                'get_autocommit' => ['type' => 'ok', 'response' => ['type' => 'get_autocommit', 'is_autocommit' => self::autocommit($pdo)]],
                 'close' => tap(['type' => 'ok', 'response' => ['type' => 'close']], function () use (&$closed) {
                     $closed = true;
                 }),
@@ -195,5 +195,21 @@ class FakeHranaServer
             ! mb_check_encoding($value, 'UTF-8') => ['type' => 'blob', 'base64' => base64_encode($value)],
             default => ['type' => 'text', 'value' => $value],
         };
+    }
+
+    /**
+     * Whether the SQLite connection is outside a transaction. PDO::inTransaction() only sees transactions
+     * opened through PDO before PHP 8.4, not an SQL BEGIN, so ask SQLite: BEGIN fails inside a transaction.
+     */
+    private static function autocommit(\PDO $pdo): bool
+    {
+        try {
+            $pdo->exec('BEGIN');
+        } catch (\PDOException) {
+            return false;
+        }
+        $pdo->exec('ROLLBACK');
+
+        return true;
     }
 }
