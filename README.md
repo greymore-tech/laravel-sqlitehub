@@ -8,24 +8,17 @@ Requirements: PHP 8.2+ with `ext-pdo` (on by default; no PDO *driver* is needed)
 
 ## Install
 
-Until the package is published (on Packagist, or as its own repository), install it with a Composer **path repository**. Composer's `vcs` repositories need `composer.json` at the repository root, so they can't point at `packages/laravel` inside the SQLiteHub monorepo directly.
+```sh
+composer require greymore/laravel-sqlitehub
+```
 
-Copy the package into your app (or add the SQLiteHub repo as a git submodule), e.g. to `packages/laravel-sqlitehub`, then:
+The service provider (`SQLiteHub\Laravel\SQLiteHubServiceProvider`) is auto-discovered. Requires PHP 8.2+ (8.3+ with Laravel 13), Laravel 12 or 13, and the `pdo` and `json` extensions; no SQLite extension, FFI or native libSQL library is needed, so it runs on Cloud Run, Lambda and shared hosting.
+
+Not on Packagist yet in your mirror? Install from GitHub directly:
 
 ```json
-// composer.json of your app
-"repositories": [
-    { "type": "path", "url": "packages/laravel-sqlitehub", "options": { "symlink": false } }
-],
+"repositories": [{ "type": "vcs", "url": "https://github.com/greymore-tech/laravel-sqlitehub" }]
 ```
-
-```sh
-composer require greymore/laravel-sqlitehub:@dev
-```
-
-`"symlink": false` copies the files into `vendor/`, so Docker builds (Cloud Run) work without the source folder at runtime. For local development next to a SQLiteHub checkout, `"url": "../sqlitehub/packages/laravel"` with the default symlink works too.
-
-The service provider (`SQLiteHub\Laravel\SQLiteHubServiceProvider`) is auto-discovered.
 
 ## Configure
 

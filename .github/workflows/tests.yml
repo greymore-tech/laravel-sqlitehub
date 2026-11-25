@@ -1,0 +1,62 @@
+# CI for the published repo (greymore-tech/laravel-sqlitehub). The source lives in the
+# SQLiteHub monorepo (packages/laravel) and is released with infra/scripts/release-laravel-driver.sh.
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  SQLD_IMAGE: ghcr.io/tursodatabase/libsql-server:v0.24.33
+  # Public key of the test signing seed in tests/Integration (tokens are signed in the tests).
+  SQLD_TEST_JWT_KEY: 8pLG4YAHEinVrsRuKrl4kGCXB-gbS5ifT06QQu6pdZA
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.2', laravel: '12.*', testbench: '10.*' }
+          - { php: '8.3', laravel: '12.*', testbench: '10.*' }
+          - { php: '8.3', laravel: '13.*', testbench: '11.*' }
+          - { php: '8.4', laravel: '13.*', testbench: '11.*', coverage: true }
+    name: PHP ${{ matrix.php }} · Laravel ${{ matrix.laravel }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite, sqlite3, sodium
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
+
+      - name: Install dependencies for Laravel ${{ matrix.laravel }}
+        run: |
+          composer require --no-update --dev "illuminate/database:${{ matrix.laravel }}" "illuminate/http:${{ matrix.laravel }}" "illuminate/support:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}"
+          composer update --no-interaction --no-progress --prefer-dist --with-all-dependencies
+
+      - name: Start sqld
+        run: |
+          docker run -d --name sqld -e SQLD_NODE=standalone -e SQLD_AUTH_JWT_KEY="$SQLD_TEST_JWT_KEY" \
+            -p 18080:8080 -p 19090:9090 "$SQLD_IMAGE" \
+            /bin/sqld --admin-listen-addr 0.0.0.0:9090 --enable-namespaces --disable-default-namespace
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:19090/health && exit 0; sleep 1; done
+          docker logs sqld; exit 1
+
+      - name: Tests
+        env:
+          SQLD_TEST_ADMIN_URL: http://127.0.0.1:19090
+          SQLD_TEST_HTTP_URL: http://127.0.0.1:18080
+        run: |
+          if [ "${{ matrix.coverage }}" = "true" ]; then
+            php vendor/bin/phpunit --fail-on-skipped --coverage-clover=coverage.xml
+            php tests/coverage-check.php coverage.xml
+          else
+            php vendor/bin/phpunit --fail-on-skipped
+          fi

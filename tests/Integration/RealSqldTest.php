@@ -136,7 +136,9 @@ class RealSqldTest extends TestCase
             RealCustomer::create(['email' => 'asha@example.com']);
             $this->fail('Expected a unique constraint violation');
         } catch (UniqueConstraintViolationException $e) {
-            $this->assertSame(['email'], $e->columns);
+            if (property_exists($e, 'columns')) {   // Laravel 13 parses the columns; 12 doesn't
+                $this->assertSame(['email'], $e->columns);
+            }
         }
 
         // Foreign keys are on in every stream.

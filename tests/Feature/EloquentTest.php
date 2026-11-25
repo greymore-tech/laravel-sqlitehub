@@ -89,7 +89,9 @@ class EloquentTest extends TestCase
             $this->customer(['email' => 'dup@example.com']);
             $this->fail('Expected a unique constraint violation');
         } catch (UniqueConstraintViolationException $e) {
-            $this->assertSame(['email'], $e->columns);
+            if (property_exists($e, 'columns')) {   // Laravel 13 parses the columns; 12 doesn't
+                $this->assertSame(['email'], $e->columns);
+            }
             $this->assertSame('SQLITE_CONSTRAINT', $e->getCode());
             $this->assertStringContainsString('SQLITE_CONSTRAINT: SQLite error: UNIQUE constraint failed: customers.email', $e->getMessage());
         }

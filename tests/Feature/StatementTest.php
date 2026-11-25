@@ -133,6 +133,14 @@ class StatementTest extends TestCase
 
     public function test_laravel_fetch_using(): void
     {
+        if (! method_exists(\Illuminate\Database\Query\Builder::class, 'fetchUsing')) {
+            // Laravel 12 has no fetchUsing(): check the same fetch mode on the statement itself.
+            $statement = DB::connection()->getPdo()->prepare('select k, v from kv order by k');
+            $statement->execute();
+            $this->assertSame(['a' => 1, 'b' => 2.5, 'c' => null], $statement->fetchAll(PDO::FETCH_KEY_PAIR));
+
+            return;
+        }
         $this->assertSame(['a' => 1, 'b' => 2.5, 'c' => null], DB::table('kv')->orderBy('k')->fetchUsing(PDO::FETCH_KEY_PAIR)->get()->all());
     }
 
