@@ -8,17 +8,17 @@ Requirements: PHP 8.2+ with `ext-pdo` (on by default; no PDO *driver* is needed)
 
 ## Install
 
-```sh
-composer require greymore/laravel-sqlitehub
-```
-
-The service provider (`SQLiteHub\Laravel\SQLiteHubServiceProvider`) is auto-discovered. Requires PHP 8.2+ (8.3+ with Laravel 13), Laravel 12 or 13, and the `pdo` and `json` extensions; no SQLite extension, FFI or native libSQL library is needed, so it runs on Cloud Run, Lambda and shared hosting.
-
-Not on Packagist yet in your mirror? Install from GitHub directly:
+The driver is published on GitHub only ([greymore-tech/laravel-sqlitehub](https://github.com/greymore-tech/laravel-sqlitehub)), not on Packagist. Add the repository to your app's `composer.json`, then require it:
 
 ```json
 "repositories": [{ "type": "vcs", "url": "https://github.com/greymore-tech/laravel-sqlitehub" }]
 ```
+
+```sh
+composer require greymore/laravel-sqlitehub:^0.1
+```
+
+Composer installs tagged releases from the repository. The service provider (`SQLiteHub\Laravel\SQLiteHubServiceProvider`) is auto-discovered. Requires PHP 8.2+ (8.3+ with Laravel 13), Laravel 12 or 13, and the `pdo` and `json` extensions; no SQLite extension, FFI or native libSQL library is needed, so it runs on Cloud Run, Lambda and shared hosting.
 
 ## Configure
 

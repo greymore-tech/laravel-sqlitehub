@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 (27 Nov 2026)
+
+- Docs: install from the GitHub repository (the driver isn't published on Packagist).
+
 ## 0.1.1 (25 Nov 2026)
 
 - `transaction_mode` (DEFERRED / IMMEDIATE / EXCLUSIVE) is honoured on every PHP version; Laravel itself sends a plain BEGIN before PHP 8.4.
